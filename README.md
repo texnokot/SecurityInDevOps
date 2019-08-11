@@ -26,7 +26,7 @@ Grab instructions from: https://anchore.com/azure-anchore-kubernetes-service-clu
 
 Add your ACR registry for Anchore analyzing.
 anchore-cli registry add --registry-type <Type> <Registry> <Username> <Password>
-anchore-cli --u admin --p foobar --url http://23.97.144.166:8228/v1 registry add --registry-type docker_v2 acrwebgoat.azurecr.io acrWebGoat "m/KoaHtgbyLx9lpa88tDbOdGq9bizvyU"
+anchore-cli --u admin --p foobar --url http://ANCHORE_ADDRESS:8228/v1 registry add --registry-type docker_v2 ACR_ADDRESS ACRUsername "PASSWORD"
 
 When Anchore service is up and running update Azure KeyVault with username and password from Anchore.
 Add server address in yml under variables:
