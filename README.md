@@ -1,5 +1,7 @@
 # Implement Security in Azure DevOps CI/CD
 
+<!-- TOC -->autoauto- [Implement Security in Azure DevOps CI/CD](#implement-security-in-azure-devops-cicd)auto    - [Introduction](#introduction)auto    - [Prerequisites](#prerequisites)auto    - [Create Azure DevOps project and prepare WebGoat source code](#create-azure-devops-project-and-prepare-webgoat-source-code)auto    - [Create Azure container registry and Azure Key Vault](#create-azure-container-registry-and-azure-key-vault)auto    - [Configure CI/CD pipeline for Webgoat](#configure-cicd-pipeline-for-webgoat)auto        - [Configure Build pipeline](#configure-build-pipeline)auto        - [Configure the release pipeline](#configure-the-release-pipeline)autoauto<!-- /TOC -->
+
 ## Introduction
 
 Document shows how to implement security practices in Azure CI/CD pipeline to detect security issues and improve the state. Vulnerable application to test is WebGoat.
@@ -106,6 +108,6 @@ Save the release pipeline and go to release pipeline's variables. Link Azure Key
 All is ready for the release. Save and create the release. After Release is run you should get container deployed in ACI.
 Check the WebGoat solution by the address: `http://ACI_FQDN:8080/WebGoat`
 
-**Enjoy learning security issues with WebGoat solution.**
+**Enjoy learning security issues with WebGoat solution!**
 
 
