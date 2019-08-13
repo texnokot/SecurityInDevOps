@@ -1,6 +1,17 @@
 # Implement Security in Azure DevOps CI/CD
 
-<!-- TOC -->autoauto- [Implement Security in Azure DevOps CI/CD](#implement-security-in-azure-devops-cicd)auto    - [Introduction](#introduction)auto    - [Prerequisites](#prerequisites)auto    - [Create Azure DevOps project and prepare WebGoat source code](#create-azure-devops-project-and-prepare-webgoat-source-code)auto    - [Create Azure container registry and Azure Key Vault](#create-azure-container-registry-and-azure-key-vault)auto    - [Configure CI/CD pipeline for Webgoat](#configure-cicd-pipeline-for-webgoat)auto        - [Configure Build pipeline](#configure-build-pipeline)auto        - [Configure the release pipeline](#configure-the-release-pipeline)autoauto<!-- /TOC -->
+<!-- TOC -->
+
+- [Implement Security in Azure DevOps CI/CD](#implement-security-in-azure-devops-cicd)
+  - [Introduction](#introduction)
+  - [Prerequisites](#prerequisites)
+  - [Create Azure DevOps project and prepare WebGoat source code](#create-azure-devops-project-and-prepare-webgoat-source-code)
+  - [Create Azure container registry and Azure Key Vault](#create-azure-container-registry-and-azure-key-vault)
+  - [Configure CI/CD pipeline for Webgoat](#configure-cicd-pipeline-for-webgoat)
+    - [Configure Build pipeline](#configure-build-pipeline)
+    - [Configure the release pipeline](#configure-the-release-pipeline)
+
+<!-- /TOC -->
 
 ## Introduction
 
@@ -14,7 +25,7 @@ This guide shows how to run WebGoat 8 container version on Azure Container Insta
 * **An Azure subscription**. To create a free account go [here](https://azure.microsoft.com/en-gb/free/?utm_source=jeliknes&utm_medium=blog&utm_campaign=storage&WT.mc_id=storage-blog-jeliknes)
 * **Azure Command Line (Azure CLI)** installed on your machine. To install go [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 * **Azure DevOps account**. To create account follow [here](https://azure.microsoft.com/en-in/services/devops/pipelines/)
-* **Github account**. To join Github go [here](https://github.com/join) 
+* **Github account**. To join Github go [here](https://github.com/join)
 
 ## Create Azure DevOps project and prepare WebGoat source code
 
