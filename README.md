@@ -56,59 +56,56 @@ You will get:
 Proceed and select `Or start with an Empty job` under Select a template.
 
 For build pipeline select `Agent pool -> Azure Pipelines` and `Agent Specification -> ubuntu-16.04` as WebGoat is based on Java.
+
 ![](https://githubpictures.blob.core.windows.net/webgoataci/UbuntuPool.png)
 
 Now it is time to add tasks for building the code. There will be 2 tasks:
+
 * **Maven** - builds WebGoat code 
 * **Container task** - builds and pushes contaner to ACI
 
 Add the task and in the search find Maven. Add the task and configure it like in the screenshot:
+
 ![](https://githubpictures.blob.core.windows.net/webgoataci/ConfigureMaven.png)
+
 Configure also advanced settings as it is important to point JDK version and Maven settings, otherwise build will fail:
+
 ![](https://githubpictures.blob.core.windows.net/webgoataci/MavenDetails.png)
 
 Add the next task, search for Docker and configure as it shown below:
+
 ![](https://githubpictures.blob.core.windows.net/webgoataci/BuildPushContainer.png)
 
-Build pipeline is ready. Save it and queue to ensure that code compiles and image is pushed to configured ACI.
+Build pipeline is ready. Save it and queue to ensure that code compiles and image is pushed to configured ACI. You should see images tagged with the BuildId and Latest. Next step is to make the release pipeline.
 
-* **Build** - builds and pushes WebGoat container to the ACR
-* **DeployToDev** - deploys pushed container from ACR to ACI. The first time running also creates ACI
+### Configure the release pipeline
 
-CI/CD pipeline requires an access to ACR to be able to push containers and an access to Resource Group at least to create ACI. To allow this create 2 service connections.
+The release pipeline is simple since it contains only one step: create ACI and deploy image from ACR. 
+Go to `Pipelines -> Releases` and choose `+New -> New release pipeline`.
+Then select proper artifact, which is the latest build.
 
-Create Service connection for ACR by going `Project settings` and under Pipelines choose `Service connections` and `New service connection`. Choose `Docker Registry` and fill required lines under `Azure Container Registry`
+![](https://githubpictures.blob.core.windows.net/webgoataci/ReleasePipeline.png)
 
-![](https://githubpictures.blob.core.windows.net/webgoataci/acrConnection.png)
+Create DevEnv stage. You can leave the default agent pool and agent specification (vs2017-win2016) since there will be only one task.
+Add the task from tasks list. Select Azure CLI. We will run Azure CLI 
 
-Create Service connection for subscription by choosing `Azure Resource Manager` service connection. Choose proper subscription and resource group.
+`az container create --resource-group $(resourceGroup) --name $(containerGroup) --image $(acrRegistry)/$(imageRepository):$(Build.BuildId) --dns-name-label $(containerDNS) --ports 8080 --registry-username $(acrUsername) --registry-password $(acrPassword)`.
 
-![](https://githubpictures.blob.core.windows.net/webgoataci/subscConnection.png)
+There is no Azure ACI task you can do this thru the command line.
 
-Open `azure-pipelines.yml` and replace variables with proper values:
+![](https://githubpictures.blob.core.windows.net/webgoataci/DeployContainerToAci.png)
 
-* **dockerRegistryServiceConnection** - Connection name for ACR
-* **resourceGroup** - Azure Resource Group where resources are located
-* **acrRegistry** - FQDN name for ACR Registry (for example: acrwebgoat.azurecr.io)
-* **subscriptionConnection** - Connection name for Azure subscription
+Save the release pipeline and go to release pipeline's variables. Link Azure Keyvault under `Variable groups` to get ACR username and password. Non sensitive variables add under `Pipeline variables`:
+
+* **resourceGroup** - Resource Group where ACI shall be deployed
 * **containerGroup** - Container group name
 * **containerDNS** - Contaner DNS label shall be unique
-  
-Add created Key Vault to Azure DevOps Project by creating new Variable group `acrDetails` under `Pipelines -> Library`.
+* **acrRegistry** - The ACR address
+* **imageRepository** - Image repository
 
-Link to Key Vault and add required variables.
-
-![](https://githubpictures.blob.core.windows.net/webgoataci/linkAKV.png)
-
-![](https://githubpictures.blob.core.windows.net/webgoataci/getAKV.png)
-
-Go to `Pipelines` and check that pipeline has been automatically created. The first time it can fail and require manual authorization.
-
-![](https://githubpictures.blob.core.windows.net/webgoataci/authorize.png)
-
-Authorize and Run pipeline. It will take some time for Maven task, but after it should create and deploy container to ACR and publish it to ACI. 
-
-![](https://githubpictures.blob.core.windows.net/webgoataci/build.png)
-
+All is ready for the release. Save and create the release. After Release is run you should get container deployed in ACI.
+Check the WebGoat solution by the address: `http://ACI_FQDN:8080/WebGoat`
 
 **Enjoy learning security issues with WebGoat solution.**
+
+
