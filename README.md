@@ -12,6 +12,7 @@
     - [Configure the release pipeline](#configure-the-release-pipeline)
   - [Whitesource Bolt: check open source components](#whitesource-bolt-check-open-source-components)
   - [Get rid off credentials from the code](#get-rid-off-credentials-from-the-code)
+  - [Scan containers for the security and complaince](#scan-containers-for-the-security-and-complaince)
 
 <!-- /TOC -->
 
@@ -170,3 +171,67 @@ There will be two agent jobs. Place CredScan's job as the first one. Add `CredSc
 Run the build and check the logs. Look into CredScan task's logs. You should find some results.
 
 ![](https://githubpictures.blob.core.windows.net/webgoataci/CredScanResults.png)
+
+## Scan containers for the security and complaince
+
+Next step is to add security checks for images as they may contain security issues and configuration flaws. There are commercial scanners available as a service in Azure.
+
+For this task we will use open source version of container complaince platform Anchore.
+
+![https://anchore.com/opensource/](https://anchore.com/wp-content/uploads/2019/04/Anchore_Logo-300x95.png)
+
+_The Anchore Engine allows developers to perform detailed analysis on their container images, run queries, produce reports and define policies that can be used in CI/CD pipelines. Developers can extend the tool to add new plugins that add new queries, new image analysis, and new policies._
+
+More information about Anchore can be found at [their website](https://anchore.com/opensource/).
+
+You need to install the solution and maintain it. [Follow the installation guide, which shows how to install Anchore server on AKS](https://anchore.com/azure-anchore-kubernetes-service-cluster-with-helm/)
+
+Write down **public IP of Anchore, username and password**. Save them in created Azure KeyVault wallet and ensure that they are linked in the Build pipeline.
+
+Install `anchore-cli` tool on your computer to be able to add your ACR registry in Anchore. Command for registering is:
+
+`anchore-cli --u ANCHORE_USERNAME --p ANCHORE_PASSWORD --url http://ANCHORE_IP:8228/v1 registry add --registry-type docker_v2 ACR_URL ACR_ADMIN "ACR_PASSWORD"`
+
+Add your image to Anchore, so it does Digest calculation. Anchore asks for image and tag, this is a reason why we also tagged images with latest. Run command:
+
+`anchore-cli --u ANCHORE_USERNAME --p ANCHORE_PASSWORD --url http://ANCHORE_IP:8228/v1 image add ACR_URL/imageREPOSITORY:latest`
+
+In the Build pipeline add the agent job with agent specification `ubuntu-16.04`. In the `Dependencies` select agen job, which is responsible for compiling and pushing WebGoat container to ACR. It is important to have that job finished before scans gets triggered as we want to scan the lates image.
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/ContainerSecurityJob.png)
+
+Add the first task, which is reponsible for installing [anchore-cli](https://github.com/anchore/anchore-cli) tool on agent.
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/InstallanchoreStep.png)
+
+Select `Bash` task and add inline command: `sudo pip install anchorecli`
+
+After tool is installed we can run scans. There will be two scan tasks:
+
+* **Vulnerability scanner** - task will scan for vulnerabilities in the image
+* **Policy scanner** - task will scan for predefined security policies. It is possible to define custom or use predefined. Policies like, for example, container has service, which runs on 22 port and etc.
+
+Add the vulnerability scanner by adding `Bash` task with inline command: `anchore-cli --json --url $(anchorServer) --u $(anchorUser) --p $(anchorPassword) image vuln $(acrRegistry)/$(imageRepository):latest os > image-vuln.json`
+
+Command runs `anchore-cli`, which triggers Anchore engine to start the scan and publish results in image-vuln.json file.
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/AnchoreVulnerabilityScan.png)
+
+Add the complaince scanner by adding `Bash` task with inline command: `anchore-cli --json --url $(anchorServer) --u $(anchorUser) --p $(anchorPassword) evaluate check $(acrRegistry)/$(imageRepository):latest --detail > image-policy.json`
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/AnchoreCompliance.png)
+
+Both scan will produce json reports and we need to publish them as pipeline artifact, which can be downloaded after. To do this add two tasks:
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/CopyFilesReportsAnchore.png)
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/PublishArtifactsAnchore.png)
+
+Run the build pipeline and after the run check for published Artifacts:
+
+![](https://githubpictures.blob.core.windows.net/devopsdayspost/AnchoreArtifacts.png)
+
+Download and explore the findings.
+
+
+TODO: add instructions for AzSk and summary.
