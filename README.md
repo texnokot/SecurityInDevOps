@@ -10,6 +10,7 @@
   - [Configure CI/CD pipeline for Webgoat](#configure-cicd-pipeline-for-webgoat)
     - [Configure Build pipeline](#configure-build-pipeline)
     - [Configure the release pipeline](#configure-the-release-pipeline)
+  - [Whitesource Bolt: check open source components](#whitesource-bolt-check-open-source-components)
 
 <!-- /TOC -->
 
@@ -121,4 +122,18 @@ Check the WebGoat solution by the address: `http://ACI_FQDN:8080/WebGoat`
 
 **Enjoy learning security issues with WebGoat solution!**
 
+## Whitesource Bolt: check open source components
 
+Development in todays world includes usage of 3rd party components. It is important to check their security state and licensing. The way how it can be done is to add security check in Build pipeline.
+One of the solution is free extension for Azure DevOps: **WhiteSource Bolt**.
+WhiteSource Bolt scans all your projects and detects open source components, their license and known vulnerabilities. Not to mention, we also provide fixes.
+Extension is available at Azure DevOps Marketplace. If it is already not installed on the organization go to the [Marketplace](https://marketplace.visualstudio.com/items?itemName=whitesource.ws-bolt) and follow WhiteSource Bolt installation instructions. After install it is available as a task.
+Next step is to add the task in `Build pipeline`. You can start with defaults:
+
+![](https://githubpictures.blob.core.windows.net/webgoataci/WhitesourceBolt.png)
+
+Add the task and run Build pipeline. After the run you will see additional Tab under Build run. Open it and explore findings:
+
+![](https://githubpictures.blob.core.windows.net/webgoataci/WhiteSourceBoltResults.png)
+
+WhiteSource Bolt is also available under `Pipelines` as a separate tab. There you can see Monitored Build definitions and export reports in 4 formats: JSON, Excel, Pdf and HTML.
