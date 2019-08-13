@@ -11,6 +11,7 @@
     - [Configure Build pipeline](#configure-build-pipeline)
     - [Configure the release pipeline](#configure-the-release-pipeline)
   - [Whitesource Bolt: check open source components](#whitesource-bolt-check-open-source-components)
+  - [Get rid off credentials from the code](#get-rid-off-credentials-from-the-code)
 
 <!-- /TOC -->
 
@@ -140,3 +141,32 @@ Add the task and run Build pipeline. After the run you will see additional Tab u
 ![](https://githubpictures.blob.core.windows.net/webgoataci/WhiteSourceBoltResults.png)
 
 WhiteSource Bolt is also available under `Pipelines` as a separate tab. There you can see Monitored Build definitions and export reports in 4 formats: JSON, Excel, Pdf and HTML.
+
+## Get rid off credentials from the code
+
+It is well known that having credentials hardcoded in the code is not good security practice. To avoid this situation, you can implement credential scanning already in the build process when code is pushed to the repository.
+
+There are different techniques and tools for that. One of them is provided by Microsoft and is part of bigger extension **Microsoft Security Code Analysis**.
+
+The Microsoft Security Code Analysis Extension is a collection of tasks for the Azure DevOps Services platform. These tasks automatically download and run secure development tools in the build pipeline. The extension is now in a Private Preview (by invitation). Extension contains different tasks focused on security checks:
+
+* **Credential Scanner** for checking secrets in the code
+* **BinSkim** is a Portable Executable (PE) light-weight scanner that validates compiler/linker settings
+* **TSLint** is an extensible static analysis tool that checks TypeScript code
+* **Roslyn Analyzers** is compiler-integrated static analysis tool for analyzing managed code (C# and VB)
+* **Security Risk Detection** is Microsoft's unique cloud-based fuzz testing service for identifying exploitable security bugs in software
+* **Anti-Malware Scanner** it runs on build agent which has Windows Defender installed.
+
+To get an access to extensions you need sign up for preview. Follow the [link](https://secdevtools.azurewebsites.net/).
+
+We will add Credential Scanner in the build pipeline. 
+
+Since the build pipeline runs on Ubuntu agent and Credential Scanner's task works only on Windows platform you need to add another agent job. Add agent job under pipeline and select agent specification `vs2017-win2016`.
+
+There will be two agent jobs. Place CredScan's job as the first one. Add `CredScan` task, you can leave defaults. CredScan allows different output formats: SARIF, PREfast, TSV, CVS. CredScan also writes findings in the Log console. After adding the task you should get following setup:
+
+![](https://githubpictures.blob.core.windows.net/webgoataci/CredScan.png)
+
+Run the build and check the logs. Look into CredScan task's logs. You should find some results.
+
+![](https://githubpictures.blob.core.windows.net/webgoataci/CredScanResults.png)
